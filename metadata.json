@@ -1,0 +1,6 @@
+{
+  "name": "Campus, Sorted - Interactive Notice Board",
+  "description": "Tactile interactive campus notice board with physical stationery, decoded notice drawer, schedule conflict detection, and calendar sync.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
