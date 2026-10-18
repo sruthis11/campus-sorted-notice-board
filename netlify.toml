@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[dev]
+  command = "npx vite"
+  targetPort = 5173
+  framework = "#custom"
+
+# Client-side app: serve index.html for any non-asset route
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
