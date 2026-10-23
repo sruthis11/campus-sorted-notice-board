@@ -32,17 +32,33 @@ export const PosterModal: React.FC<PosterModalProps> = ({ notice, onClose }) => 
           <X className="w-5 h-5" />
         </button>
 
-        {/* Poster Paper Frame */}
-        <div className="border-4 border-double border-stone-800 p-6 sm:p-8 bg-[#fdfcf9] rounded-sm relative shadow-inner">
-          {/* Institutional Header */}
-          <div className="text-center border-b border-stone-300 pb-4 mb-6">
-            <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-stone-500 block">
-              CAMPUS ACADEMIC COUNCIL & CLUBS
-            </span>
-            <div className="text-xs font-serif italic text-stone-600 mt-0.5">
-              Official Bulletin Board Notice · Spring Semester 2025
+        {/* If original poster image is available, display it directly */}
+        {notice.posterImageData ? (
+          <div className="space-y-4">
+            <div className="border border-stone-300 rounded-xl overflow-hidden bg-stone-950 p-2 flex items-center justify-center max-h-[520px]">
+              <img
+                src={notice.posterImageData}
+                alt={notice.title}
+                className="max-h-[500px] w-auto object-contain rounded shadow-lg"
+              />
+            </div>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 flex items-center justify-between">
+              <span className="font-semibold text-stone-800">Source: Original Verified Event Poster</span>
+              {notice.organizer && <span className="font-medium text-amber-700">{notice.organizer}</span>}
             </div>
           </div>
+        ) : (
+          /* Poster Paper Frame */
+          <div className="border-4 border-double border-stone-800 p-6 sm:p-8 bg-[#fdfcf9] rounded-sm relative shadow-inner">
+            {/* Institutional Header */}
+            <div className="text-center border-b border-stone-300 pb-4 mb-6">
+              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-stone-500 block">
+                CAMPUS ACADEMIC COUNCIL & CLUBS
+              </span>
+              <div className="text-xs font-serif italic text-stone-600 mt-0.5">
+                Official Bulletin Board Notice · Spring Semester 2025
+              </div>
+            </div>
 
           {/* Category Tag */}
           <div className="text-center mb-2">
@@ -108,6 +124,7 @@ export const PosterModal: React.FC<PosterModalProps> = ({ notice, onClose }) => 
             <span className="font-mono">REF: #{notice.id.slice(0, 8).toUpperCase()}</span>
           </div>
         </div>
+        )}
 
         {/* Modal Actions */}
         <div className="mt-5 flex items-center justify-end gap-3">

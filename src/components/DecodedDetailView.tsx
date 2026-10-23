@@ -145,15 +145,37 @@ export const DecodedDetailView: React.FC<DecodedDetailViewProps> = ({
           {/* Right Column: Decoded Structured Intelligence */}
           <div className="lg:col-span-7 space-y-6">
             <div>
-              <span className="text-xs font-bold tracking-widest uppercase text-stone-500 block mb-1">
-                {notice.category}
-              </span>
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className="text-xs font-bold tracking-widest uppercase text-stone-500">
+                  {notice.category}
+                </span>
+                {notice.organizer && notice.organizer !== 'Not mentioned in poster' && (
+                  <>
+                    <span className="text-stone-300">•</span>
+                    <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Organized by {notice.organizer}
+                    </span>
+                  </>
+                )}
+                {notice.isAutoExtracted && (
+                  <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    ⚡ Auto-Extracted from Poster
+                  </span>
+                )}
+              </div>
+
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-950 font-serif leading-tight">
                 {notice.title}
               </h1>
               <p className="text-stone-700 text-base sm:text-lg leading-relaxed mt-2.5">
                 {notice.subtitle}
               </p>
+
+              {notice.summary && notice.summary !== notice.subtitle && (
+                <div className="mt-3 p-3 bg-stone-50 border-l-3 border-amber-500 rounded-r-lg text-xs text-stone-700 font-medium italic">
+                  “{notice.summary}”
+                </div>
+              )}
             </div>
 
             {/* 4-Item Key Info Grid */}
@@ -264,13 +286,27 @@ export const DecodedDetailView: React.FC<DecodedDetailViewProps> = ({
                 <ExternalLink className="w-3.5 h-3.5 text-stone-400" />
               </a>
 
+              {/* Direct Web Registration Link (if extracted from poster) */}
+              {notice.registrationLink && notice.registrationLink !== 'Not mentioned in poster' && (
+                <a
+                  href={notice.registrationLink.startsWith('http') ? notice.registrationLink : `https://${notice.registrationLink}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-emerald-400 bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-semibold hover:bg-emerald-100 shadow-xs transition-colors whitespace-nowrap"
+                  title="Open official registration portal"
+                >
+                  <ExternalLink className="w-4 h-4 text-emerald-600" />
+                  <span>Official Portal</span>
+                </a>
+              )}
+
               {/* Registration / Event Pass Link */}
               <button
                 type="button"
                 onClick={() => onOpenRegister(notice)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 text-white text-xs sm:text-sm font-semibold hover:bg-amber-700 shadow-md transition-all cursor-pointer whitespace-nowrap"
               >
-                <span>{notice.isRegistered ? 'View Event Pass' : 'Registration link'}</span>
+                <span>{notice.isRegistered ? 'View Event Pass' : 'Get Event Pass'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 

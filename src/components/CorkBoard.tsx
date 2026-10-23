@@ -17,6 +17,7 @@ interface CorkBoardProps {
   onToggleLoupe: () => void;
   breezeEnabled: boolean;
   onToggleBreeze: () => void;
+  onOpenPosterAutomation?: () => void;
 }
 
 export const CorkBoard: React.FC<CorkBoardProps> = ({
@@ -31,6 +32,7 @@ export const CorkBoard: React.FC<CorkBoardProps> = ({
   onToggleLoupe,
   breezeEnabled,
   onToggleBreeze,
+  onOpenPosterAutomation
 }) => {
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +58,11 @@ export const CorkBoard: React.FC<CorkBoardProps> = ({
       n.title.toLowerCase().includes(q) ||
       n.subtitle.toLowerCase().includes(q) ||
       n.category.toLowerCase().includes(q) ||
-      n.venue.toLowerCase().includes(q);
+      (n.organizer && n.organizer.toLowerCase().includes(q)) ||
+      (n.summary && n.summary.toLowerCase().includes(q)) ||
+      (n.fullNotice && n.fullNotice.toLowerCase().includes(q)) ||
+      n.venue.toLowerCase().includes(q) ||
+      n.regDeadline.toLowerCase().includes(q);
 
     return matchesCat && matchesSearch;
   });
@@ -84,15 +90,27 @@ export const CorkBoard: React.FC<CorkBoardProps> = ({
           ))}
         </div>
 
-        {/* Search & Loupe Toggle */}
+        {/* Search, Automation Action & Loupe Toggle */}
         <div className="flex items-center gap-2.5 ml-auto">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search pinned notices..."
+            placeholder="Search pinned notices or organizers..."
             className="px-3 py-1.5 text-xs bg-stone-900/60 border border-amber-900/40 rounded-lg text-amber-100 placeholder-amber-200/40 focus:outline-none focus:ring-1 focus:ring-amber-400 w-36 sm:w-52"
           />
+
+          {onOpenPosterAutomation && (
+            <button
+              type="button"
+              onClick={onOpenPosterAutomation}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-stone-950 shadow-md transition-transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap"
+              title="Upload poster/flyer image or PDF to auto-extract structured digital notice"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-stone-900" />
+              <span>Auto-Extract Poster</span>
+            </button>
+          )}
 
           <button
             type="button"

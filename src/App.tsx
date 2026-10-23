@@ -13,10 +13,12 @@ import { TimelineRibbon } from './components/TimelineRibbon';
 import { RegisterModal } from './components/RegisterModal';
 import { PinNoticeModal } from './components/PinNoticeModal';
 import { PosterModal } from './components/PosterModal';
+import { PosterAutomationModal } from './components/PosterAutomationModal';
 import { ConflictRadarModal } from './components/ConflictRadarModal';
 import { NoticeCard } from './components/NoticeCard';
 import { BabyOinkLogin } from './components/BabyOinkLogin';
-import { Sparkles, Calendar, Layers, Bookmark, ArrowUp, Loader2, Wind } from 'lucide-react';
+import { AiNoticeAgent } from './components/AiNoticeAgent';
+import { Sparkles, Calendar, Layers, Bookmark, ArrowUp, Loader2, Wind, Bot } from 'lucide-react';
 
 export default function App() {
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -24,7 +26,7 @@ export default function App() {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   // Views & Filters
-  const [activeNavView, setActiveNavView] = useState<'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login'>('board');
+  const [activeNavView, setActiveNavView] = useState<'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login' | 'agent'>('board');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [loupeEnabled, setLoupeEnabled] = useState(true);
@@ -53,11 +55,14 @@ export default function App() {
   // User Registered Passes
   const [userRegistrations, setUserRegistrations] = useState<Registration[]>([]);
 
-  // Modals
+  // Modals & Drawers
   const [registerModalNotice, setRegisterModalNotice] = useState<Notice | null>(null);
   const [posterModalNotice, setPosterModalNotice] = useState<Notice | null>(null);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
+  const [isAgentDrawerOpen, setIsAgentDrawerOpen] = useState(false);
+  const [isPosterAutomationOpen, setIsPosterAutomationOpen] = useState(false);
+  const [publishToast, setPublishToast] = useState<string | null>(null);
 
   const decodedSectionRef = useRef<HTMLDivElement>(null);
   const boardSectionRef = useRef<HTMLDivElement>(null);
@@ -118,6 +123,8 @@ export default function App() {
   const handleNoticePinned = (newNotice: Notice) => {
     setNotices((prev) => [newNotice, ...prev]);
     setSelectedNotice(newNotice);
+    setPublishToast(`Notice "${newNotice.title}" verified & pinned to board!`);
+    setTimeout(() => setPublishToast(null), 4500);
     setTimeout(() => {
       if (decodedSectionRef.current) {
         decodedSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -173,6 +180,42 @@ export default function App() {
     );
   }
 
+  // If user selected dedicated full-screen AI Notice Agent view
+  if (activeNavView === 'agent') {
+    return (
+      <div className="min-h-screen bg-[#242120] text-slate-900 flex flex-col font-sans selection:bg-amber-300 selection:text-amber-950">
+        <Navbar
+          onOpenPinModal={() => setIsPinModalOpen(true)}
+          onOpenConflicts={() => setIsConflictModalOpen(true)}
+          conflictCount={conflictCount}
+          activeView={activeNavView}
+          onViewChange={(view) => {
+            setActiveNavView(view);
+            if (view === 'board') handleReturnToBoard();
+          }}
+          bookmarksCount={bookmarkedIds.length}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenPosterAutomation={() => setIsPosterAutomationOpen(true)}
+        />
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col justify-center">
+          <AiNoticeAgent
+            notices={notices}
+            onSelectNotice={(n) => {
+              setSelectedNotice(n);
+              setActiveNavView('decoded');
+              setTimeout(() => {
+                decodedSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }, 60);
+            }}
+            onOpenRegister={(n) => setRegisterModalNotice(n)}
+            onClose={handleReturnToBoard}
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#242120] text-slate-900 flex flex-col font-sans selection:bg-amber-300 selection:text-amber-950">
       {/* 3-Zone Top Navigation Contract */}
@@ -191,6 +234,7 @@ export default function App() {
         bookmarksCount={bookmarkedIds.length}
         currentUser={currentUser}
         onLogout={handleLogout}
+        onOpenPosterAutomation={() => setIsPosterAutomationOpen(true)}
       />
 
       <main className="flex-1 w-full">
@@ -260,6 +304,7 @@ export default function App() {
                 onToggleLoupe={() => setLoupeEnabled(!loupeEnabled)}
                 breezeEnabled={breezeEnabled}
                 onToggleBreeze={() => setBreezeEnabled(!breezeEnabled)}
+                onOpenPosterAutomation={() => setIsPosterAutomationOpen(true)}
               />
             </section>
 
@@ -292,6 +337,20 @@ export default function App() {
         )}
       </main>
 
+      {/* Floating Bottom Left Action: Ask AI Notice Agent */}
+      <div className="fixed bottom-6 left-6 z-30">
+          <button
+            type="button"
+            onClick={() => setIsAgentDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-stone-950 font-extrabold text-xs sm:text-sm shadow-2xl hover:shadow-amber-500/30 border border-amber-300 cursor-pointer transition-all hover:scale-105 active:scale-95 group"
+            title="Ask AI Notice Agent questions about deadlines, rules, and eligibility"
+          >
+            <Bot className="w-4 h-4 text-stone-900 group-hover:rotate-12 transition-transform" />
+            <span>Ask AI Agent</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-700 animate-ping" />
+          </button>
+        </div>
+
       {/* Floating Return-To-Top Quick Action */}
       <div className="fixed bottom-6 right-6 z-30">
         <button
@@ -305,8 +364,30 @@ export default function App() {
         </button>
       </div>
 
-      {/* Modals */}
+      {/* Modals & Floating Agent Drawer */}
       <AnimatePresence>
+        {isAgentDrawerOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/70 backdrop-blur-xs">
+            <AiNoticeAgent
+              notices={notices}
+              isFloating
+              onSelectNotice={(notice) => {
+                setSelectedNotice(notice);
+                setIsAgentDrawerOpen(false);
+                setActiveNavView('decoded');
+                setTimeout(() => {
+                  decodedSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 80);
+              }}
+              onOpenRegister={(notice) => {
+                setIsAgentDrawerOpen(false);
+                setRegisterModalNotice(notice);
+              }}
+              onClose={() => setIsAgentDrawerOpen(false)}
+            />
+          </div>
+        )}
+
         {registerModalNotice && (
           <RegisterModal
             notice={registerModalNotice}
@@ -330,6 +411,14 @@ export default function App() {
           />
         )}
 
+        {isPosterAutomationOpen && (
+          <PosterAutomationModal
+            isOpen={isPosterAutomationOpen}
+            onClose={() => setIsPosterAutomationOpen(false)}
+            onNoticePublished={handleNoticePinned}
+          />
+        )}
+
         {isConflictModalOpen && (
           <ConflictRadarModal
             isOpen={isConflictModalOpen}
@@ -342,6 +431,14 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      {/* Verified Notice Published Toast */}
+      {publishToast && (
+        <div className="fixed top-20 right-6 z-50 p-4 rounded-2xl bg-emerald-950/95 border border-emerald-500/80 text-emerald-100 shadow-2xl flex items-center gap-3 backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <span className="text-xs font-bold">{publishToast}</span>
+        </div>
+      )}
     </div>
   );
 }

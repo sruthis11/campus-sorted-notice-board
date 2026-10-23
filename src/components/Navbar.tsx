@@ -1,15 +1,16 @@
 import React from 'react';
-import { Pin, AlertTriangle, Bookmark, LayoutGrid, Calendar, LogOut } from 'lucide-react';
+import { Pin, AlertTriangle, Bookmark, LayoutGrid, Calendar, LogOut, Sparkles } from 'lucide-react';
 
 interface NavbarProps {
   onOpenPinModal: () => void;
   onOpenConflicts: () => void;
   conflictCount: number;
-  activeView: 'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login';
-  onViewChange: (view: 'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login') => void;
+  activeView: 'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login' | 'agent';
+  onViewChange: (view: 'board' | 'decoded' | 'timeline' | 'bookmarks' | 'login' | 'agent') => void;
   bookmarksCount: number;
   currentUser: { name: string; email: string } | null;
   onLogout: () => void;
+  onOpenPosterAutomation?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -20,7 +21,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onViewChange,
   bookmarksCount,
   currentUser,
-  onLogout
+  onLogout,
+  onOpenPosterAutomation
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#1c1815]/95 backdrop-blur-md border-b border-amber-950/40 text-stone-200">
@@ -83,6 +85,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
+            onClick={() => onViewChange('agent')}
+            className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'agent' ? 'text-amber-400 font-bold' : 'hover:text-amber-300 text-stone-300'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>AI Agent</span>
+            <span className="text-[9px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-500/30">
+              NEW
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => onViewChange('bookmarks')}
             className={`transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5 ${
               activeView === 'bookmarks' ? 'text-amber-400 font-bold' : 'hover:text-white text-stone-300'
@@ -124,8 +140,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
         </nav>
 
-        {/* Zone 3: 1 primary action */}
+        {/* Zone 3: Primary actions */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {onOpenPosterAutomation && (
+            <button
+              type="button"
+              onClick={onOpenPosterAutomation}
+              className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-200 bg-stone-900/90 hover:bg-stone-800 border border-amber-500/40 rounded-xl transition-all shadow-md cursor-pointer whitespace-nowrap hover:border-amber-400"
+              title="Upload poster or flyer to automatically extract digital notice"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Auto-Extract Poster</span>
+            </button>
+          )}
+
           {/* Mobile Login icon if small screen */}
           <button
             type="button"
